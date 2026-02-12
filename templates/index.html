@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jeu des 18 Numéros</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🎉 Jeu des 18 Numéros 🎉</h1>
+
+{% if not gage %}
+<form method="POST">
+    <input type="text" name="numero" placeholder="Entre ton numéro" required>
+    <br><br>
+    <button type="submit">Valider ✅</button>
+</form>
+{% else %}
+<h2>Ton gage :</h2>
+<p class="gage">{{ gage }}</p>
+
+<!-- Bouton pour valider le gage -->
+<form action="/valider" method="POST" style="display:inline;">
+    <input type="hidden" name="numero" value="{{ numero }}">
+    <button type="submit">Gage fait ✅</button>
+</form>
+
+<!-- Bouton pour donner un autre gage sans valider -->
+<form method="POST" style="display:inline; margin-left:10px;">
+    <input type="hidden" name="numero" value="{{ numero }}">
+    <input type="hidden" name="nouveau_gage" value="1">
+    <button type="submit">Donner un autre gage 🔄</button>
+</form>
+
+<br><br>
+<a href="/classement">Voir le classement 🏆</a>
+{% endif %}
+
+</body>
+</html>
