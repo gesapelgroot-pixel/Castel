@@ -5,6 +5,46 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+def init_db():
+    conn = sqlite3.connect("database.db")
+    c = conn.cursor()
+
+    # Table Joueurs
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS Joueurs (
+        numero TEXT PRIMARY KEY,
+        score INTEGER,
+        gage_en_cours TEXT,
+        etat_gage TEXT
+    )
+    """)
+
+    # Table Gages
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS Gages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        texte TEXT,
+        points INTEGER,
+        actif INTEGER
+    )
+    """)
+
+    # Table Historique
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS Historique (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        numero_joueur TEXT,
+        texte_gage TEXT,
+        points INTEGER,
+        date TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+init_db()
+
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
