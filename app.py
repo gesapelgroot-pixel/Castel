@@ -92,8 +92,4 @@ def classement():
     """).fetchall()
     return render_template("classement.html", joueurs=joueurs)
 
-if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Railway fournit le port via cette variable
-    app.run(host="0.0.0.0", port=port)
 
