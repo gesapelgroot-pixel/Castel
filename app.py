@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 import random
 from datetime import datetime
-import os
 
 app = Flask(__name__)
 
@@ -284,7 +283,11 @@ def admin():
 def health():
     return "OK", 200
 
+import os
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
 
 
