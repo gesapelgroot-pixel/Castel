@@ -1,9 +1,13 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request
 import sqlite3
 import random
 from datetime import datetime
 
 app = Flask(__name__)
+
+# -------------------------
+# INIT DATABASE
+# -------------------------
 
 def init_db():
     conn = sqlite3.connect("database.db")
@@ -19,7 +23,7 @@ def init_db():
     )
     """)
 
-    # Table Gages
+    # Table Gages (corrigée)
     c.execute("""
     CREATE TABLE IF NOT EXISTS Gages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,17 +47,145 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+# -------------------------
+# INSÉRER LES GAGES SI VIDE
+# -------------------------
+
+def inserer_gages_si_vide():
+    conn = sqlite3.connect("database.db")
+    c = conn.cursor()
+
+    count = c.execute("SELECT COUNT(*) FROM Gages").fetchone()[0]
+
+    if count == 0:
+        gages = [
+    # FUN & RAPIDES - 1 point
+    ("Faire un compliment sincère à quelqu’un.", 1, 1),
+    ("Faire un check original à 3 personnes.", 1, 1),
+    ("Faire une photo drôle avec un inconnu.", 1, 1),
+    ("Lancer un “applaudissement général” sans raison.", 1, 1),
+    ("Parler avec un accent pendant 5 minutes.", 1, 1),
+    ("Faire une pose mannequin pendant 30 secondes.", 1, 1),
+    ("Inventer un slogan pour la soirée.", 1, 1),
+    ("Faire deviner ton numéro sans le dire.", 1, 1),
+    ("Danser 20 secondes sur la musique en cours.", 1, 1),
+    ("Faire un selfie avec quelqu’un de plus de 30 ans.", 1, 1),
+    ("Faire un selfie avec quelqu’un de moins de 18 ans.", 1, 1),
+    ("Dire un souvenir gênant (soft).", 1, 1),
+    ("Faire semblant d’être un serveur pendant 3 minutes.", 1, 1),
+    ("Imiter un prof du lycée.", 1, 1),
+    ("Faire une déclaration dramatique à une chaise.", 1, 1),
+    ("Faire un slow imaginaire.", 1, 1),
+    ("Changer de place avec quelqu’un au hasard.", 1, 1),
+    ("Faire rire quelqu’un en moins de 1 minute.", 1, 1),
+    ("Dire “c’est incroyable” 5 fois dans une discussion.", 1, 1),
+    ("Donner un surnom à quelqu’un pour la soirée.", 1, 1),
+
+    # SOCIAUX - 2 points
+    ("Trouver quelqu’un né le même mois que toi.", 2, 1),
+    ("Faire un duo danse improvisé.", 2, 1),
+    ("Organiser une mini ola dans la pièce.", 2, 1),
+    ("Faire un high five à 10 personnes.", 2, 1),
+    ("Convaincre quelqu’un de faire un gage avec toi.", 2, 1),
+    ("Faire une photo de groupe improvisée.", 2, 1),
+    ("Demander un conseil de vie à un adulte.", 2, 1),
+    ("Apprendre un mot d’argot à quelqu’un de plus âgé.", 2, 1),
+    ("Complimenter 3 personnes différentes.", 2, 1),
+    ("Faire croire que tu annonces quelque chose d’important.", 2, 1),
+    ("Lancer un mini concours de pierre-feuille-ciseaux.", 2, 1),
+    ("Faire une interview rapide d’un invité.", 2, 1),
+    ("Faire dire “18 ans déjà ?!” à quelqu’un.", 2, 1),
+    ("Trouver quelqu’un qui porte la même couleur que toi.", 2, 1),
+    ("Faire un duo TikTok (même faux).", 2, 1),
+    ("Organiser une photo “génération ado vs adultes”.", 2, 1),
+    ("Faire un compliment à quelqu’un que tu connais peu.", 2, 1),
+    ("Rassembler 5 personnes pour crier “JOYEUX ANNIVERSAIRE”.", 2, 1),
+
+    # DRÔLES - 3 points
+    ("Faire un discours de 30 secondes comme si tu étais maire.", 3, 1),
+    ("Imiter une star connue.", 3, 1),
+    ("Improviser une pub pour la soirée.", 3, 1),
+    ("Parler en rimes pendant 2 minutes.", 3, 1),
+    ("Faire une entrée dramatique dans la pièce.", 3, 1),
+    ("Jouer une scène de film connue.", 3, 1),
+    ("Faire semblant d’être le DJ.", 3, 1),
+    ("Faire un défilé de mode.", 3, 1),
+    ("Faire une déclaration d’amitié publique.", 3, 1),
+    ("Parler comme un commentateur sportif.", 3, 1),
+    ("Faire semblant d’avoir gagné un Oscar.", 3, 1),
+    ("Inventer une histoire absurde sur l’organisateur.", 3, 1),
+    ("Faire une danse robot.", 3, 1),
+    ("Faire un battle de regard.", 3, 1),
+    ("Faire une imitation animale.", 3, 1),
+    ("Faire un rap improvisé sur la soirée.", 3, 1),
+    ("Raconter la soirée comme si c’était un documentaire.", 3, 1),
+    ("Faire semblant d’être un influenceur.", 3, 1),
+    ("Jouer une scène romantique avec un objet.", 3, 1),
+    ("Faire un discours comme si tu avais 80 ans.", 3, 1),
+
+    # CHALLENGE - 4 points
+    ("Faire 10 squats en chantant.", 4, 1),
+    ("Deviner 3 chansons au blind test rapide.", 4, 1),
+    ("Faire rire 3 personnes différentes.", 4, 1),
+    ("Réussir un défi danse imposé.", 4, 1),
+    ("Faire un compliment original à 5 personnes.", 4, 1),
+    ("Organiser un mini concours express.", 4, 1),
+    ("Faire une pyramide humaine (sécurisée).", 4, 1),
+    ("Convaincre quelqu’un de chanter avec toi.", 4, 1),
+    ("Raconter une anecdote drôle en 30 secondes.", 4, 1),
+    ("Faire un battle de danse.", 4, 1),
+    ("Garder un accent pendant 10 minutes.", 4, 1),
+    ("Réussir un défi “ne pas sourire” 1 minute.", 4, 1),
+    ("Faire un discours sérieux… qui finit absurde.", 4, 1),
+    ("Faire lever toute la pièce.", 4, 1),
+    ("Trouver 3 personnes qui ont déjà travaillé.", 4, 1),
+    ("Lancer un chant collectif.", 4, 1),
+    ("Faire une pose photo collective originale.", 4, 1),
+    ("Inventer un cri de guerre de la soirée.", 4, 1),
+    ("Faire un compliment public à un adulte.", 4, 1),
+    ("Organiser un mini toast improvisé.", 4, 1)
+]
+
+        c.executemany(
+            "INSERT INTO Gages (texte, points, actif) VALUES (?, ?, ?)",
+            gages
+        )
+
+        conn.commit()
+
+    conn.close()
+
+
+# IMPORTANT : on initialise tout au démarrage
 init_db()
+inserer_gages_si_vide()
+
+
+# -------------------------
+# CONNEXION DB
+# -------------------------
 
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-# Tirer un gage aléatoire
+
+# -------------------------
+# TIRER UN GAGE
+# -------------------------
+
 def tirer_gage(conn):
     gages = conn.execute("SELECT * FROM Gages WHERE actif = 1").fetchall()
+    if not gages:
+        return None
     return random.choice(gages)
+
+
+# -------------------------
+# ROUTES
+# -------------------------
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -63,25 +195,34 @@ def index():
         numero = request.form["numero"]
         nouveau_gage_flag = request.form.get("nouveau_gage")
 
-        # Vérifier si joueur existe
-        joueur = conn.execute("SELECT * FROM Joueurs WHERE numero = ?", (numero,)).fetchone()
+        joueur = conn.execute(
+            "SELECT * FROM Joueurs WHERE numero = ?", 
+            (numero,)
+        ).fetchone()
 
         if not joueur:
             conn.execute(
                 "INSERT INTO Joueurs (numero, score, gage_en_cours, etat_gage) VALUES (?, 0, '', 'aucun')",
-                (numero,))
+                (numero,)
+            )
             conn.commit()
-            joueur = conn.execute("SELECT * FROM Joueurs WHERE numero = ?", (numero,)).fetchone()
+            joueur = conn.execute(
+                "SELECT * FROM Joueurs WHERE numero = ?", 
+                (numero,)
+            ).fetchone()
 
-        # Tirer un nouveau gage si le joueur veut juste un nouveau gage
-        # ou s'il n'a pas de gage en cours
         if nouveau_gage_flag == "1" or joueur["etat_gage"] != "en_cours":
             gage_random = tirer_gage(conn)
-            conn.execute(
-                "UPDATE Joueurs SET gage_en_cours = ?, etat_gage = 'en_cours' WHERE numero = ?",
-                (gage_random["texte"], numero))
-            conn.commit()
-            gage = gage_random["texte"]
+
+            if gage_random:
+                conn.execute(
+                    "UPDATE Joueurs SET gage_en_cours = ?, etat_gage = 'en_cours' WHERE numero = ?",
+                    (gage_random["texte"], numero)
+                )
+                conn.commit()
+                gage = gage_random["texte"]
+            else:
+                gage = "Aucun gage disponible."
         else:
             gage = joueur["gage_en_cours"]
 
@@ -89,40 +230,54 @@ def index():
 
     return render_template("index.html", gage=None)
 
+
 @app.route("/valider", methods=["POST"])
 def valider():
     conn = get_db()
     numero = request.form["numero"]
 
-    joueur = conn.execute("SELECT * FROM Joueurs WHERE numero = ?", (numero,)).fetchone()
-    gage = conn.execute("SELECT * FROM Gages WHERE texte = ?", (joueur["gage_en_cours"],)).fetchone()
+    joueur = conn.execute(
+        "SELECT * FROM Joueurs WHERE numero = ?", 
+        (numero,)
+    ).fetchone()
 
-    # Ajouter points et marquer gage comme fait
-    nouveau_score = joueur["score"] + gage["points"]
-    conn.execute(
-        "UPDATE Joueurs SET score = ?, etat_gage = 'termine' WHERE numero = ?",
-        (nouveau_score, numero))
+    gage = conn.execute(
+        "SELECT * FROM Gages WHERE texte = ?", 
+        (joueur["gage_en_cours"],)
+    ).fetchone()
 
-    # Ajouter à l'historique
-    conn.execute(
-        "INSERT INTO Historique (numero_joueur, texte_gage, points, date) VALUES (?, ?, ?, ?)",
-        (numero, gage["texte"], gage["points"], datetime.now()))
+    if gage:
+        nouveau_score = joueur["score"] + gage["points"]
 
-    conn.commit()
+        conn.execute(
+            "UPDATE Joueurs SET score = ?, etat_gage = 'termine' WHERE numero = ?",
+            (nouveau_score, numero)
+        )
 
-    # Tirer un nouveau gage automatiquement
+        conn.execute(
+            "INSERT INTO Historique (numero_joueur, texte_gage, points, date) VALUES (?, ?, ?, ?)",
+            (numero, gage["texte"], gage["points"], datetime.now())
+        )
+
+        conn.commit()
+
     gage_random = tirer_gage(conn)
-    conn.execute(
-        "UPDATE Joueurs SET gage_en_cours = ?, etat_gage = 'en_cours' WHERE numero = ?",
-        (gage_random["texte"], numero))
-    conn.commit()
 
-    return render_template("index.html", gage=gage_random["texte"], numero=numero)
+    if gage_random:
+        conn.execute(
+            "UPDATE Joueurs SET gage_en_cours = ?, etat_gage = 'en_cours' WHERE numero = ?",
+            (gage_random["texte"], numero)
+        )
+        conn.commit()
+        return render_template("index.html", gage=gage_random["texte"], numero=numero)
+
+    return render_template("index.html", gage="Plus de gages disponibles.", numero=numero)
+
 
 @app.route("/classement")
 def classement():
     conn = get_db()
-    # Nombre de gages réalisés par joueur
+
     joueurs = conn.execute("""
         SELECT numero, score, COUNT(Historique.id) AS gages_faits
         FROM Joueurs
@@ -130,6 +285,5 @@ def classement():
         GROUP BY Joueurs.numero
         ORDER BY score DESC
     """).fetchall()
+
     return render_template("classement.html", joueurs=joueurs)
-
-
