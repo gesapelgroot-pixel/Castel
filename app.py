@@ -287,3 +287,9 @@ def classement():
     """).fetchall()
 
     return render_template("classement.html", joueurs=joueurs)
+
+
+@app.route("/health")
+def health():
+    return "OK", 200
+
