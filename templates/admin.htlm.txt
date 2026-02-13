@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>👑 Panneau Admin 👑</h1>
+
+<h2>Classement</h2>
+<table>
+<tr>
+<th>Numéro</th>
+<th>Score</th>
+</tr>
+
+{% for j in joueurs %}
+<tr>
+<td>{{ j["numero"] }}</td>
+<td>{{ j["score"] }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Historique complet</h2>
+<table>
+<tr>
+<th>Numéro</th>
+<th>Défi</th>
+<th>Points</th>
+<th>Date</th>
+</tr>
+
+{% for h in historique %}
+<tr>
+<td>{{ h["numero_joueur"] }}</td>
+<td>{{ h["texte_gage"] }}</td>
+<td>{{ h["points"] }}</td>
+<td>{{ h["date"] }}</td>
+</tr>
+{% endfor %}
+</table>
+
+</body>
+</html>

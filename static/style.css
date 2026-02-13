@@ -1,104 +1,53 @@
-/* === Corps de page === */
 body {
     text-align: center;
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #ff6a00, #ffcc00);
-    color: #fff;
-    padding: 20px;
-    min-height: 100vh;
+    color: white;
+    padding: 30px;
 }
 
-/* === Titres === */
 h1 {
-    font-size: 42px;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px #333;
+    font-size: 50px;
 }
 
-/* === Gage === */
 .gage {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
-    margin: 20px auto;
-    padding: 15px;
     background: rgba(255,255,255,0.2);
-    border-radius: 12px;
-    width: 80%;
-    max-width: 500px;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 600px;
 }
 
-/* === Inputs === */
 input {
-    padding: 12px;
+    padding: 15px;
+    font-size: 20px;
     border-radius: 10px;
     border: none;
-    width: 220px;
-    font-size: 16px;
 }
 
-/* === Boutons === */
 button {
-    padding: 12px 20px;
-    background: #fff;
-    color: #ff6a00;
-    border: none;
+    padding: 15px 25px;
+    font-size: 18px;
     border-radius: 10px;
+    border: none;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.3s;
-    margin: 5px;
+    margin: 10px;
 }
 
-button:hover {
-    background: #ffcc00;
-    color: #fff;
+ul {
+    list-style: none;
+    padding: 0;
 }
 
-/* === Liens === */
-a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* === Tableau classement === */
 table {
     margin: 20px auto;
-    background: rgba(255,255,255,0.9);
-    color: #333;
+    background: white;
+    color: black;
     border-radius: 10px;
     width: 80%;
     max-width: 600px;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background: #ff6a00;
-    color: #fff;
-}
-
-/* === Responsive === */
-@media (max-width: 600px) {
-    input, button {
-        width: 80%;
-        font-size: 18px;
-    }
-
-    .gage {
-        width: 90%;
-        font-size: 18px;
-    }
-
-    table {
-        width: 95%;
-    }
 }
