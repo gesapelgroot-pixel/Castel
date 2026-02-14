@@ -51,12 +51,13 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def inserer_gages():
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
 
     gages = [
-        # FUN & RAPIDES - 1 point
+           # FUN & RAPIDES - 1 point
     ("Faire un compliment sincère à quelqu’un.", 1, 1),
     ("Faire un check original à 3 personnes.", 1, 1),
     ("Faire une photo drôle avec un inconnu.", 1, 1),
@@ -141,14 +142,16 @@ def inserer_gages():
     ("Inventer un cri de guerre de la soirée.", 4, 1),
     ("Faire un compliment public à un adulte.", 4, 1),
     ("Organiser un mini toast improvisé.", 4, 1)
-]
-   c.executemany(
+    ]
+
+    c.executemany(
         "INSERT INTO Gages (texte, points, actif) VALUES (?, ?, ?)",
         gages
     )
 
     conn.commit()
     conn.close()
+
 
 init_db()
 inserer_gages()
@@ -161,6 +164,7 @@ def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
+
 
 # -------------------------
 # TIRER GAGE NON FAIT
@@ -180,6 +184,7 @@ def tirer_gage(conn, numero):
 
     return random.choice(gages)
 
+
 # -------------------------
 # PAGE PRINCIPALE
 # -------------------------
@@ -191,7 +196,6 @@ def index():
     if request.method == "POST":
         numero = request.form["numero"]
 
-        # ADMIN
         if numero == ADMIN_NUMERO:
             return redirect("/admin")
 
@@ -214,12 +218,15 @@ def index():
             WHERE numero_joueur=?
         """, (numero,)).fetchall()
 
-        return render_template("index.html",
-                               numero=numero,
-                               gage=gage,
-                               historique=historique)
+        return render_template(
+            "index.html",
+            numero=numero,
+            gage=gage,
+            historique=historique
+        )
 
     return render_template("index.html", gage=None)
+
 
 # -------------------------
 # VALIDER DÉFI
@@ -235,16 +242,13 @@ def valider():
         (numero,)
     ).fetchone()
 
-    gage = conn.execute(
-        "SELECT * FROM Gages WHERE texte=?",
-        (joueur["gage_en_cours"],)
-    ).fetchone()
+    gage = tirer_gage(conn, numero)
 
     if gage:
         nouveau_score = joueur["score"] + gage["points"]
 
         conn.execute(
-            "UPDATE Joueurs SET score=?, etat_gage='termine' WHERE numero=?",
+            "UPDATE Joueurs SET score=? WHERE numero=?",
             (nouveau_score, numero)
         )
 
@@ -255,7 +259,8 @@ def valider():
 
         conn.commit()
 
-    return redirect("/?numero=" + numero + "&confetti=1")
+    return redirect("/")
+
 
 # -------------------------
 # ADMIN PANEL
@@ -273,9 +278,12 @@ def admin():
         SELECT * FROM Historique ORDER BY date DESC
     """).fetchall()
 
-    return render_template("admin.html",
-                           joueurs=joueurs,
-                           historique=historique)
+    return render_template(
+        "admin.html",
+        joueurs=joueurs,
+        historique=historique
+    )
+
 
 # -------------------------
 
@@ -286,7 +294,3 @@ def health():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
-
-
-
-
