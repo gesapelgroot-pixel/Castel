@@ -230,8 +230,6 @@ def index():
 
         confetti=confetti
 
-
-
         return render_template(
             "index.html",
             numero=numero,
