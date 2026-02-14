@@ -55,8 +55,8 @@ def inserer_gages():
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
 
-        gages = [
-    # FUN & RAPIDES - 1 point
+    gages = [
+        # FUN & RAPIDES - 1 point
     ("Faire un compliment sincère à quelqu’un.", 1, 1),
     ("Faire un check original à 3 personnes.", 1, 1),
     ("Faire une photo drôle avec un inconnu.", 1, 1),
