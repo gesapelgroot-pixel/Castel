@@ -8,22 +8,62 @@
 
 <h1>👑 Panneau Admin 👑</h1>
 
-<h2>Classement</h2>
+<h2>🏆 Podium 🏆</h2>
+
+<div class="podium">
+
+    {% if joueurs|length > 1 %}
+    <div class="place second">
+        🥈 <br>
+        {{ joueurs[1]["numero"] }} <br>
+        {{ joueurs[1]["score"] }} pts
+    </div>
+    {% endif %}
+
+    {% if joueurs|length > 0 %}
+    <div class="place first">
+        🥇 <br>
+        {{ joueurs[0]["numero"] }} <br>
+        {{ joueurs[0]["score"] }} pts
+    </div>
+    {% endif %}
+
+    {% if joueurs|length > 2 %}
+    <div class="place third">
+        🥉 <br>
+        {{ joueurs[2]["numero"] }} <br>
+        {{ joueurs[2]["score"] }} pts
+    </div>
+    {% endif %}
+
+</div>
+
+<h2>📋 Classement</h2>
+
 <table>
 <tr>
+<th>Position</th>
 <th>Numéro</th>
 <th>Score</th>
 </tr>
 
-{% for j in joueurs %}
+{% for joueur in joueurs %}
+{% if loop.index > 3 %}
 <tr>
-<td>{{ j["numero"] }}</td>
-<td>{{ j["score"] }}</td>
+<td>{{ loop.index }}</td>
+<td>{{ joueur["numero"] }}</td>
+<td>{{ joueur["score"] }}</td>
 </tr>
+{% endif %}
 {% endfor %}
+
 </table>
 
-<h2>Historique complet</h2>
+<h2>👀 Historique complet</h2>
+
+<button onclick="toggleReveal()">Révéler les joueurs</button>
+
+<div id="historique" style="display:none;">
 <table>
 <tr>
 <th>Numéro</th>
@@ -41,6 +81,18 @@
 </tr>
 {% endfor %}
 </table>
+</div>
+
+<script>
+function toggleReveal() {
+    var x = document.getElementById("historique");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+}
+</script>
 
 </body>
 </html>
