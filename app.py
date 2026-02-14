@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import random
 from datetime import datetime
 import os
 
 app = Flask(__name__)
+app.secret_key = "super_secret_key_2026"
+
 
 ADMIN_NUMERO = "333"
 
@@ -193,8 +195,16 @@ def tirer_gage(conn, numero):
 def index():
     conn = get_db()
 
+    numero = session.get("numero")
+
+    if not numero:
+    return render_template("index.html", gage=None, confetti=None)
+
+   confetti = request.args.get("confetti") 
+
     if request.method == "POST":
         numero = request.form["numero"]
+        session["numero"] = numero
 
         if numero == ADMIN_NUMERO:
             return redirect("/admin")
@@ -218,6 +228,10 @@ def index():
             WHERE numero_joueur=?
         """, (numero,)).fetchall()
 
+        confetti=confetti
+
+
+
         return render_template(
             "index.html",
             numero=numero,
@@ -235,7 +249,6 @@ def index():
 @app.route("/valider", methods=["POST"])
 def valider():
     conn = get_db()
-    numero = request.form["numero"]
 
     joueur = conn.execute(
         "SELECT * FROM Joueurs WHERE numero=?",
