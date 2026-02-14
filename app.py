@@ -191,13 +191,8 @@ def tirer_gage(conn, numero):
 @app.route("/", methods=["GET", "POST"])
 def index():
     conn = get_db()
-    numero = session.get("numero")
 
-    if not numero:
-        return render_template("index.html", gage=None, confetti=None)
-
-    confetti = request.args.get("confetti")
-
+    # Si on envoie le formulaire
     if request.method == "POST":
         numero = request.form["numero"]
         session["numero"] = numero
@@ -217,20 +212,29 @@ def index():
             )
             conn.commit()
 
-        gage = tirer_gage(conn, numero)
+    # Récupérer numéro depuis session
+    numero = session.get("numero")
 
-        historique = conn.execute("""
-            SELECT texte_gage, points FROM Historique
-            WHERE numero_joueur=?
-        """, (numero,)).fetchall()
+    if not numero:
+        return render_template("index.html", gage=None)
 
-        return render_template(
-            "index.html",
-            numero=numero,
-            gage=gage,
-            historique=historique,
-            confetti=confetti
-        )
+    confetti = request.args.get("confetti")
+
+    gage = tirer_gage(conn, numero)
+
+    historique = conn.execute("""
+        SELECT texte_gage, points FROM Historique
+        WHERE numero_joueur=?
+    """, (numero,)).fetchall()
+
+    return render_template(
+        "index.html",
+        numero=numero,
+        gage=gage,
+        historique=historique,
+        confetti=confetti
+    )
+
 
     return render_template("index.html", gage=None, confetti=confetti)
 
@@ -242,18 +246,28 @@ def index():
 def valider():
     conn = get_db()
     numero = session.get("numero")
+
     if not numero:
         return redirect("/")
 
-    joueur = conn.execute(
-        "SELECT * FROM Joueurs WHERE numero=?",
-        (numero,)
-    ).fetchone()
+    # On reprend le dernier gage affiché
+    dernier_gage = conn.execute("""
+        SELECT * FROM Gages
+        WHERE texte NOT IN (
+            SELECT texte_gage FROM Historique
+            WHERE numero_joueur=?
+        )
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (numero,)).fetchone()
 
-    gage = tirer_gage(conn, numero)
+    if dernier_gage:
+        joueur = conn.execute(
+            "SELECT * FROM Joueurs WHERE numero=?",
+            (numero,)
+        ).fetchone()
 
-    if gage:
-        nouveau_score = joueur["score"] + gage["points"]
+        nouveau_score = joueur["score"] + dernier_gage["points"]
 
         conn.execute(
             "UPDATE Joueurs SET score=? WHERE numero=?",
@@ -262,12 +276,13 @@ def valider():
 
         conn.execute(
             "INSERT INTO Historique (numero_joueur, texte_gage, points, date) VALUES (?, ?, ?, ?)",
-            (numero, gage["texte"], gage["points"], datetime.now().isoformat())
+            (numero, dernier_gage["texte"], dernier_gage["points"], datetime.now().isoformat())
         )
 
         conn.commit()
 
-    return redirect("/")
+    return redirect("/?confetti=1")
+
 
 # -------------------------
 # ADMIN PANEL
