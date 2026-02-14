@@ -142,8 +142,7 @@ def inserer_gages():
     ("Faire un compliment public à un adulte.", 4, 1),
     ("Organiser un mini toast improvisé.", 4, 1)
 ]
-
-        c.executemany(
+   c.executemany(
         "INSERT INTO Gages (texte, points, actif) VALUES (?, ?, ?)",
         gages
     )
