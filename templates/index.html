@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>18 & Sans Limite 🎉</title>
+    <title>18 & Sans Limite</title>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
@@ -14,53 +12,10 @@
     <button>🏆 Voir le classement</button>
 </a>
 
-{% if not gage %}
-
 <form method="POST">
     <input type="text" name="numero" placeholder="Entre ton numéro" required>
-    <br><br>
-    <button type="submit">Entrer 🎉</button>
+    <button type="submit">Entrer</button>
 </form>
-
-{% else %}
-
-<h2>Ton défi :</h2>
-
-<p class="gage">
-    {{ gage["texte"] }} <br>
-    <strong>+{{ gage["points"] }} points 🎯</strong>
-</p>
-
-<form action="/valider" method="POST">
-    <button type="submit">Défi réalisé ✅</button>
-</form>
-
-<form action="/" method="GET">
-    <button type="submit">🎲 Donner un nouveau gage</button>
-</form>
-
-<form action="/" method="POST">
-    <button type="submit">⬅ Retour (changer de numéro)</button>
-</form>
-
-<h3>📜 Défis réalisés :</h3>
-<ul>
-    {% for h in historique %}
-        <li>{{ h["texte_gage"] }} (+{{ h["points"] }} pts)</li>
-    {% endfor %}
-</ul>
-
-{% endif %}
-
-<script>
-if (window.location.search.includes("confetti=1")) {
-    confetti({
-        particleCount: 200,
-        spread: 90,
-        origin: { y: 0.6 }
-    });
-}
-</script>
 
 </body>
 </html>

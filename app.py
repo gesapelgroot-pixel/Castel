@@ -7,10 +7,8 @@ import os
 app = Flask(__name__)
 app.secret_key = "super_secret_key_2026"
 
-ADMIN_NUMERO = "333"
-
 # -------------------------
-# DATABASE INIT (SANS DROP)
+# DATABASE INIT
 # -------------------------
 
 def init_db():
@@ -20,9 +18,7 @@ def init_db():
     c.execute("""
     CREATE TABLE IF NOT EXISTS Joueurs (
         numero TEXT PRIMARY KEY,
-        score INTEGER,
-        gage_en_cours TEXT,
-        etat_gage TEXT
+        score INTEGER DEFAULT 0
     )
     """)
 
@@ -30,8 +26,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS Gages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         texte TEXT,
-        points INTEGER,
-        actif INTEGER
+        points INTEGER
     )
     """)
 
@@ -145,7 +140,7 @@ def inserer_gages():
         ]
 
         c.executemany(
-            "INSERT INTO Gages (texte, points, actif) VALUES (?, ?, 1)",
+            "INSERT INTO Gages (texte, points) VALUES (?, ?)",
             gages
         )
         conn.commit()
@@ -155,7 +150,6 @@ def inserer_gages():
 
 init_db()
 inserer_gages()
-
 
 # -------------------------
 # DB CONNECTION
@@ -168,39 +162,18 @@ def get_db():
 
 
 # -------------------------
-# TIRER GAGE
-# -------------------------
-
-def tirer_gage(conn, numero):
-    gages = conn.execute("""
-        SELECT * FROM Gages
-        WHERE actif = 1
-        AND texte NOT IN (
-            SELECT texte_gage FROM Historique WHERE numero_joueur = ?
-        )
-    """, (numero,)).fetchall()
-
-    if not gages:
-        return None
-
-    return random.choice(gages)
-
-
-# -------------------------
-# PAGE PRINCIPALE
+# PAGE ACCUEIL (NUMERO)
 # -------------------------
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    conn = get_db()
+    session.pop("gage_id", None)
 
     if request.method == "POST":
         numero = request.form.get("numero")
         session["numero"] = numero
 
-        if numero == ADMIN_NUMERO:
-            return redirect("/admin")
-
+        conn = get_db()
         joueur = conn.execute(
             "SELECT * FROM Joueurs WHERE numero=?",
             (numero,)
@@ -208,37 +181,39 @@ def index():
 
         if not joueur:
             conn.execute(
-                "INSERT INTO Joueurs VALUES (?, 0, '', 'aucun')",
+                "INSERT INTO Joueurs (numero, score) VALUES (?, 0)",
                 (numero,)
             )
             conn.commit()
 
+        return redirect("/jeu")
+
+    return render_template("index.html")
+
+
+# -------------------------
+# PAGE JEU (GAGE)
+# -------------------------
+
+@app.route("/jeu")
+def jeu():
     numero = session.get("numero")
+
     if not numero:
-        return render_template("index.html", gage=None)
+        return redirect("/")
 
-    confetti = request.args.get("confetti")
+    conn = get_db()
 
-    # -------------------------
-    # TIRAGE GAGE LOGIQUE
-    # -------------------------
-    joueur = conn.execute(
-        "SELECT * FROM Joueurs WHERE numero=?",
-        (numero,)
-    ).fetchone()
-
-    gage = None
-    if joueur and joueur["gage_en_cours"]:
-        gage = {"texte": joueur["gage_en_cours"], "points": 0}
+    # Tirage nouveau gage si aucun en session
+    if "gage_id" not in session:
+        gages = conn.execute("SELECT * FROM Gages").fetchall()
+        gage = random.choice(gages)
+        session["gage_id"] = gage["id"]
     else:
-        nouveau_gage = tirer_gage(conn, numero)
-        if nouveau_gage:
-            gage = nouveau_gage
-            conn.execute(
-                "UPDATE Joueurs SET gage_en_cours=?, etat_gage='en_cours' WHERE numero=?",
-                (gage["texte"], numero)
-            )
-            conn.commit()
+        gage = conn.execute(
+            "SELECT * FROM Gages WHERE id=?",
+            (session["gage_id"],)
+        ).fetchone()
 
     historique = conn.execute("""
         SELECT texte_gage, points FROM Historique
@@ -246,85 +221,92 @@ def index():
     """, (numero,)).fetchall()
 
     return render_template(
-        "index.html",
-        numero=numero,
+        "jeu.html",
         gage=gage,
-        historique=historique,
-        confetti=confetti
+        historique=historique
     )
 
 
 # -------------------------
-# VALIDER GAGE
+# VALIDER
 # -------------------------
 
 @app.route("/valider", methods=["POST"])
 def valider():
-    conn = get_db()
     numero = session.get("numero")
+    gage_id = session.get("gage_id")
 
-    if not numero:
+    if not numero or not gage_id:
         return redirect("/")
+
+    conn = get_db()
+
+    gage = conn.execute(
+        "SELECT * FROM Gages WHERE id=?",
+        (gage_id,)
+    ).fetchone()
 
     joueur = conn.execute(
         "SELECT * FROM Joueurs WHERE numero=?",
         (numero,)
     ).fetchone()
 
-    if not joueur or not joueur["gage_en_cours"]:
-        return redirect("/")
-
-    texte_gage = joueur["gage_en_cours"]
-
-    gage = conn.execute(
-        "SELECT * FROM Gages WHERE texte=?",
-        (texte_gage,)
-    ).fetchone()
-
-    if not gage:
-        return redirect("/")
-
     nouveau_score = joueur["score"] + gage["points"]
 
     conn.execute(
-        "UPDATE Joueurs SET score=?, gage_en_cours='', etat_gage='aucun' WHERE numero=?",
+        "UPDATE Joueurs SET score=? WHERE numero=?",
         (nouveau_score, numero)
     )
 
     conn.execute(
         "INSERT INTO Historique (numero_joueur, texte_gage, points, date) VALUES (?, ?, ?, ?)",
-        (numero, texte_gage, gage["points"], datetime.now().isoformat())
+        (numero, gage["texte"], gage["points"], datetime.now().isoformat())
     )
 
     conn.commit()
-    return redirect("/?confetti=1")
+
+    session.pop("gage_id", None)
+
+    return redirect("/jeu")
 
 
 # -------------------------
-# ADMIN
+# NOUVEAU GAGE
 # -------------------------
 
-@app.route("/admin")
-def admin():
+@app.route("/nouveau")
+def nouveau():
+    session.pop("gage_id", None)
+    return redirect("/jeu")
+
+
+# -------------------------
+# CHANGER NUMERO
+# -------------------------
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+
+# -------------------------
+# CLASSEMENT
+# -------------------------
+
+@app.route("/classement")
+def classement():
     conn = get_db()
 
     joueurs = conn.execute("""
         SELECT * FROM Joueurs ORDER BY score DESC
     """).fetchall()
 
-    historique = conn.execute("""
-        SELECT * FROM Historique ORDER BY date DESC
-    """).fetchall()
-
-    return render_template(
-        "admin.html",
-        joueurs=joueurs,
-        historique=historique
-    )
+    return render_template("classement.html", joueurs=joueurs)
 
 
 # -------------------------
-# HEALTH CHECK
+# HEALTH
 # -------------------------
 
 @app.route("/health")
