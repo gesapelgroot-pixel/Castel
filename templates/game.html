@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jeu</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>Ton défi :</h1>
+
+<div class="gage">
+    {{ gage["texte"] }} (+{{ gage["points"] }} pts)
+</div>
+
+<form action="/valider" method="POST">
+    <button>✅ Défi réalisé</button>
+</form>
+
+<a href="/nouveau">
+    <button>🎲 Nouveau gage</button>
+</a>
+
+<a href="/classement">
+    <button>🏆 Voir le classement</button>
+</a>
+
+<a href="/logout">
+    <button>⬅ Changer de numéro</button>
+</a>
+
+<h3>Défis réalisés :</h3>
+<ul>
+{% for h in historique %}
+    <li>{{ h["texte_gage"] }} (+{{ h["points"] }})</li>
+{% endfor %}
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+{% if success %}
+<script>
+    confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.6 }
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

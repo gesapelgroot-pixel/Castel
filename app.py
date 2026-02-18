@@ -143,6 +143,7 @@ def inserer_gages():
             "INSERT INTO Gages (texte, points) VALUES (?, ?)",
             gages
         )
+
         conn.commit()
 
     conn.close()
@@ -162,15 +163,19 @@ def get_db():
 
 
 # -------------------------
-# PAGE ACCUEIL (NUMERO)
+# PAGE 1 - ACCUEIL
 # -------------------------
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    session.pop("gage_id", None)
 
     if request.method == "POST":
         numero = request.form.get("numero")
+
+        if not numero:
+            return redirect("/")
+
+        session.clear()
         session["numero"] = numero
 
         conn = get_db()
@@ -192,7 +197,7 @@ def index():
 
 
 # -------------------------
-# PAGE JEU (GAGE)
+# PAGE 2 - JEU
 # -------------------------
 
 @app.route("/jeu")
@@ -204,7 +209,7 @@ def jeu():
 
     conn = get_db()
 
-    # Tirage nouveau gage si aucun en session
+    # Tirage gage si aucun en session
     if "gage_id" not in session:
         gages = conn.execute("SELECT * FROM Gages").fetchall()
         gage = random.choice(gages)
@@ -220,10 +225,13 @@ def jeu():
         WHERE numero_joueur=?
     """, (numero,)).fetchall()
 
+    success = request.args.get("success")
+
     return render_template(
         "jeu.html",
         gage=gage,
-        historique=historique
+        historique=historique,
+        success=success
     )
 
 
@@ -267,7 +275,7 @@ def valider():
 
     session.pop("gage_id", None)
 
-    return redirect("/jeu")
+    return redirect("/jeu?success=1")
 
 
 # -------------------------
@@ -281,7 +289,7 @@ def nouveau():
 
 
 # -------------------------
-# CHANGER NUMERO
+# LOGOUT
 # -------------------------
 
 @app.route("/logout")
@@ -303,15 +311,6 @@ def classement():
     """).fetchall()
 
     return render_template("classement.html", joueurs=joueurs)
-
-
-# -------------------------
-# HEALTH
-# -------------------------
-
-@app.route("/health")
-def health():
-    return "OK", 200
 
 
 # -------------------------
