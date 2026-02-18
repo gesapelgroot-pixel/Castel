@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import random
 from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = "super_secret_key_2026"
+app.secret_key = "supersecretkey"
+
 
 # -------------------------
 # DATABASE INIT
@@ -195,6 +196,12 @@ def index():
 
     return render_template("index.html")
 
+@app.route("/retour")
+def retour():
+    if "numero" in session:
+        return redirect(url_for("jeu"))
+    else:
+        return redirect(url_for("index"))
 
 # -------------------------
 # PAGE 2 - JEU
